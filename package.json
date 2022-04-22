@@ -1,0 +1,29 @@
+{
+  "name": "sdc-reviews-api",
+  "version": "1.0.0",
+  "description": "reviews api service for sdc",
+  "main": "/server/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server": "nodemon server/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jutam653/SDC-reviews-test.git"
+  },
+  "author": "jutam653",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jutam653/SDC-reviews-test/issues"
+  },
+  "homepage": "https://github.com/jutam653/SDC-reviews-test#readme",
+  "dependencies": {
+    "express": "^4.17.3",
+    "node": "^17.7.2",
+    "npm": "^8.7.0",
+    "pg": "^8.7.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+}
