@@ -8,8 +8,20 @@ const app = express();
 app.use(express.json());
 
 app.get('/reviews', (req, res) => {
-  psql.getReviews(66000)
-    .then((results) => res.status(200).send(results.rows));
+  const product = {};
+  let page = req.query.page || 1;
+  let count = Number(req.query.count) || 5;
+  let order = req.query.sort || 'helpful';
+  psql.getReviews(req.query.product_id, page, count, order)
+    .then((results) => {
+      console.log(results.rows)
+      product.product = req.query.product_id
+      product.page = Number(page)
+      product.count = count
+      product.results = results.rows
+    })
+    .then(() => res.status(200).send(product))
+    .catch((err) => res.status(404).send(err));
 })
 
 app.listen(PORT, () => {

@@ -80,6 +80,38 @@ INSERT INTO products (product_id)
 SELECT DISTINCT product_id
 FROM raw_products;
 
+-- product
+SELECT product_id
+FROM products
+WHERE product_id = 2;
+
+-- reviews
+SELECT review_id, rating, summary, recommend, response, body, to_timestamp(date / 1000), reviewer_name, helpfulness
+FROM reviews AS RESULTS
+WHERE product_id = 65660;
+
+-- photos
+SELECT json_build_object('id', p.photo_id, 'url', url) AS photos
+FROM photos
+INNER JOIN reviews
+ON reviews.review_id = photos.review_id
+WHERE product_id = 65660;
+
+-- reviews/photos
+SELECT r.review_id, r.rating, r.summary, r.recommend, r.response, r.body, to_timestamp(r.date / 1000) AS date, r.reviewer_name, r.helpfulness,
+COALESCE(json_agg(
+  json_build_object('id', p.photo_id, 'url', p.url)
+) FILTER (WHERE p.photo_id IS NOT NULL), '[]') photos
+FROM photos p
+RIGHT OUTER JOIN reviews r
+ON r.review_id = p.review_id
+WHERE r.product_id = 65660
+GROUP BY r.review_id
+ORDER BY r.helpfulness DESC;
+
+
+
+
 
 
 
