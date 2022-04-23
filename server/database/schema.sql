@@ -98,7 +98,7 @@ ON reviews.review_id = photos.review_id
 WHERE product_id = 65660;
 
 -- reviews/photos
-SELECT r.review_id, r.rating, r.summary, r.recommend, r.response, r.body, to_timestamp(r.date / 1000) AS date, r.reviewer_name, r.helpfulness,
+SELECT r.review_id, r.rating, r.summary, r.recommend, NULLIF(r.response, 'null') AS response, r.body, to_timestamp(r.date / 1000) AS date, r.reviewer_name, r.helpfulness,
 COALESCE(json_agg(
   json_build_object('id', p.photo_id, 'url', p.url)
 ) FILTER (WHERE p.photo_id IS NOT NULL), '[]') photos
@@ -108,6 +108,18 @@ ON r.review_id = p.review_id
 WHERE r.product_id = 65660
 GROUP BY r.review_id
 ORDER BY r.helpfulness DESC;
+
+-- ratings
+SELECT r.product_id, array_agg(r.rating) rating
+FROM reviews r
+WHERE r.product_id = 65660
+GROUP BY r.product_id;
+
+SELECT json_build_object(json_build_object(r.rating, count(*)::TEXT)) ratings
+FROM reviews r
+WHERE r.product_id = 65660
+GROUP BY r.rating;
+
 
 
 

@@ -13,7 +13,7 @@ const getReviews = (id, page, count, order) => {
   }
 
   const query = `
-    SELECT r.review_id, r.rating, r.summary, r.recommend, r.response, r.body, to_timestamp(r.date / 1000) AS date, r.reviewer_name, r.helpfulness,
+    SELECT r.review_id::INT, r.rating, r.summary, r.recommend, NULLIF(r.response, 'null') AS response, r.body, to_timestamp(r.date / 1000) AS date, r.reviewer_name, r.helpfulness,
     COALESCE(json_agg(
       json_build_object('id', p.photo_id, 'url', p.url)
     ) FILTER (WHERE p.photo_id IS NOT NULL), '[]') photos
@@ -26,9 +26,22 @@ const getReviews = (id, page, count, order) => {
     LIMIT ${count} OFFSET ${offset}
   `;
 
-  return db.query(query)
+  return db.query(query);
+}
+
+const getMeta = () => {
+
+  const query = `
+  SELECT json_build_object(r.rating, count(*)::TEXT) ratings
+  FROM reviews r
+  WHERE r.product_id = 65660
+  GROUP BY r.rating
+  `;
+
+  return db.query(query);
 }
 
 module.exports = {
   getReviews,
+  getMeta,
 }

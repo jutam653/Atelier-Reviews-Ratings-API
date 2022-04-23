@@ -24,6 +24,11 @@ app.get('/reviews', (req, res) => {
     .catch((err) => res.status(404).send(err));
 })
 
+app.get('/reviews/meta', (req, res) => {
+  psql.getMeta()
+    .then((results) => res.status(200).send(results.rows));
+})
+
 app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`)
 });
