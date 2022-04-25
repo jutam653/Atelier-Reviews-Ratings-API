@@ -32,30 +32,31 @@ const getReviews = (id, page, count, order) => {
 const getMeta = (id) => {
 
   const query = `
-  SELECT cr.product_id::TEXT, json_object_agg(ra.rating, ra.count::TEXT) ratings, json_object_agg(rec.recommend, rec.count::TEXT)recommended, json_object_agg(cr.name, cr.obj) characteristics
-    FROM (
-    SELECT
-      recommend, count(*)
-      FROM reviews r
-      WHERE product_id = ${id}
-      GROUP BY recommend
-    ) AS rec,
-    (
-    SELECT
-      rating, count(*)
-      FROM reviews
-      WHERE product_id = ${id}
-      GROUP BY rating
-    ) AS ra,
-    (
-      SELECT c.product_id, c.name, json_build_object('id', c.characteristic_id, 'value', avg(cr.value)::TEXT) AS obj
-      FROM characteristics c
-      INNER JOIN characteristic_reviews cr
-      ON cr.characteristic_id = c.characteristic_id
-      WHERE c.product_id = ${id}
-      GROUP BY c.characteristic_id
-      ) AS cr
-  GROUP BY cr.product_id
+    SELECT cr.product_id::TEXT, json_object_agg(ra.rating, ra.count::TEXT) ratings, json_object_agg(rec.recommend, rec.count::TEXT) recommended, json_object_agg(cr.name, cr.obj) characteristics
+      FROM (
+      SELECT
+        recommend, count(*)
+        FROM reviews r
+        WHERE product_id = ${id}
+        GROUP BY recommend
+      ) AS rec,
+      (
+      SELECT
+        rating, count(*)
+        FROM reviews
+        WHERE product_id = ${id}
+        GROUP BY rating
+      ) AS ra,
+      (
+        SELECT c.product_id, c.name, json_build_object('id', c.characteristic_id, 'value', avg(cr.value)::TEXT) AS obj
+        FROM characteristics c
+        INNER JOIN characteristic_reviews cr
+        ON cr.characteristic_id = c.characteristic_id
+        WHERE c.product_id = ${id}
+        GROUP BY c.characteristic_id
+        ORDER BY c.characteristic_id ASC
+        ) AS cr
+    GROUP BY cr.product_id
   `;
 
   return db.query(query);
