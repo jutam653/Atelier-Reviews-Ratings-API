@@ -8,29 +8,37 @@ const app = express();
 app.use(express.json());
 
 app.get('/reviews', (req, res) => {
-  const product = {};
+  const reviews = {};
   let page = req.query.page || 1;
   let count = Number(req.query.count) || 5;
   let order = req.query.sort || 'helpful';
   psql.getReviews(req.query.product_id, page, count, order)
     .then((results) => {
       console.log(results.rows)
-      product.product = req.query.product_id
-      product.page = Number(page)
-      product.count = count
-      product.results = results.rows
+      reviews.product = req.query.product_id
+      reviews.page = Number(page)
+      reviews.count = count
+      reviews.results = results.rows
     })
-    .then(() => res.status(200).send(product))
+    .then(() => res.status(200).send(reviews))
     .catch((err) => res.status(404).send(err));
-})
+});
 
 app.get('/reviews/meta', (req, res) => {
   psql.getMeta(req.query.product_id)
     .then((results) => res.status(200).send(results.rows[0]))
     .catch((err) => res.status(404).send(err));
+});
+
+app.post('/reviews', (req, res) => {
+  let date = new Date().getTime();
+  console.log(date)
+  console.log(req.body, req.body.photos, req.body.characteristics)
+  // psql.addReview(req.body, date)
+  //   .then((results) => res.status(201).send('POSTED'))
+  //   .catch((err) => res.status(404).send(err));
 })
 
 app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`)
 });
-

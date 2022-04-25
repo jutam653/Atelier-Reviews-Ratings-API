@@ -1,7 +1,7 @@
-DROP TABLE IF EXISTS characteristics;
-DROP TABLE IF EXISTS photos;
-DROP TABLE IF EXISTS reviews;
-DROP TABLE IF EXISTS products;
+-- DROP TABLE IF EXISTS characteristics;
+-- DROP TABLE IF EXISTS photos;
+-- DROP TABLE IF EXISTS reviews;
+-- DROP TABLE IF EXISTS products;
 
 -- create tables for schema
 
@@ -139,27 +139,28 @@ FROM (
 -- combined
 SELECT cr.product_id::TEXT, json_object_agg(ra.rating, ra.count::TEXT) ratings, json_object_agg(rec.recommend, rec.count::TEXT) recommended, json_object_agg(cr.name, cr.obj) characteristics
   FROM (
-  SELECT
-    recommend, count(*)
-    FROM reviews r
-    WHERE product_id = 900000
-    GROUP BY recommend
+    SELECT
+      recommend, count(*)
+      FROM reviews r
+      WHERE product_id = 900000
+      GROUP BY recommend
   ) AS rec,
   (
-  SELECT
-    rating, count(*)
-    FROM reviews
-    WHERE product_id = 900000
-    GROUP BY rating
+    SELECT
+      rating, count(*)
+      FROM reviews
+      WHERE product_id = 900000
+      GROUP BY rating
   ) AS ra,
   (
-    SELECT c.product_id, c.name, json_build_object('id', c.characteristic_id, 'value', avg(cr.value)::TEXT) AS obj
-    FROM characteristics c
-    INNER JOIN characteristic_reviews cr
-    ON cr.characteristic_id = c.characteristic_id
-    WHERE c.product_id = 900000
-    GROUP BY c.characteristic_id
-    ORDER BY c.characteristic_id ASC
+    SELECT
+      c.product_id, c.name, json_build_object('id', c.characteristic_id, 'value', avg(cr.value)::TEXT) AS obj
+      FROM characteristics c
+      INNER JOIN characteristic_reviews cr
+      ON cr.characteristic_id = c.characteristic_id
+      WHERE c.product_id = 900000
+      GROUP BY c.characteristic_id
+      ORDER BY c.characteristic_id ASC
   ) AS cr
 GROUP BY cr.product_id;
 

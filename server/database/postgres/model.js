@@ -27,36 +27,52 @@ const getReviews = (id, page, count, order) => {
   `;
 
   return db.query(query);
-}
+};
 
 const getMeta = (id) => {
 
   const query = `
     SELECT cr.product_id::TEXT, json_object_agg(ra.rating, ra.count::TEXT) ratings, json_object_agg(rec.recommend, rec.count::TEXT) recommended, json_object_agg(cr.name, cr.obj) characteristics
-      FROM (
-      SELECT
-        recommend, count(*)
-        FROM reviews r
-        WHERE product_id = ${id}
-        GROUP BY recommend
+    FROM (
+        SELECT
+          recommend, count(*)
+          FROM reviews r
+          WHERE product_id = ${id}
+          GROUP BY recommend
       ) AS rec,
       (
-      SELECT
-        rating, count(*)
-        FROM reviews
-        WHERE product_id = ${id}
-        GROUP BY rating
+        SELECT
+          rating, count(*)
+          FROM reviews
+          WHERE product_id = ${id}
+          GROUP BY rating
       ) AS ra,
       (
-        SELECT c.product_id, c.name, json_build_object('id', c.characteristic_id, 'value', avg(cr.value)::TEXT) AS obj
-        FROM characteristics c
-        INNER JOIN characteristic_reviews cr
-        ON cr.characteristic_id = c.characteristic_id
-        WHERE c.product_id = ${id}
-        GROUP BY c.characteristic_id
-        ORDER BY c.characteristic_id ASC
-        ) AS cr
+        SELECT
+          c.product_id, c.name, json_build_object('id', c.characteristic_id, 'value', avg(cr.value)::TEXT) AS obj
+          FROM characteristics c
+          INNER JOIN characteristic_reviews cr
+          ON cr.characteristic_id = c.characteristic_id
+          WHERE c.product_id = ${id}
+          GROUP BY c.characteristic_id
+          ORDER BY c.characteristic_id ASC
+      ) AS cr
     GROUP BY cr.product_id
+  `;
+
+  return db.query(query);
+};
+
+const addReview = (body, date) => {
+
+  const query = `
+  WITH ins1 AS (
+    INSERT INTO reviews(product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness)
+    VALUES (${body.product_id}, ${body.rating}, ${date}, ${body.summary}, ${body.body}, ${body.recommend}, false, ${body.name}, ${body.email})
+    RETURNING review_id
+    )
+  , INSERT INTO photos(review_id, url)
+    VALUES(review_id, UNNEST(${body.photos}))
   `;
 
   return db.query(query);
@@ -65,4 +81,5 @@ const getMeta = (id) => {
 module.exports = {
   getReviews,
   getMeta,
-}
+  addReview,
+};
