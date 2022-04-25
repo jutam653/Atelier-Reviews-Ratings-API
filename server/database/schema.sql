@@ -110,15 +110,40 @@ GROUP BY r.review_id
 ORDER BY r.helpfulness DESC;
 
 -- ratings
-SELECT r.product_id, array_agg(r.rating) rating
-FROM reviews r
-WHERE r.product_id = 65660
-GROUP BY r.product_id;
+SELECT json_object_agg(r.rating, r.count) ratings
+FROM (
+	SELECT
+		rating, count(*) AS count
+		FROM reviews
+		WHERE product_id = 1
+		GROUP BY rating
+	) AS r;
 
-SELECT json_build_object(json_build_object(r.rating, count(*)::TEXT)) ratings
-FROM reviews r
-WHERE r.product_id = 65660
-GROUP BY r.rating;
+-- ratings + recommended
+SELECT json_object_agg(ra.rating, ra.count) ratings, json_object_agg(rec.recommend, rec.count) recommended
+FROM (
+	SELECT
+		recommend, count(*)
+		FROM reviews
+		WHERE product_id = 65660
+		GROUP BY recommend
+	) AS rec,
+	(
+	SELECT
+		rating, count(*)
+		FROM reviews
+		WHERE product_id = 65660
+		GROUP BY rating
+	) AS ra;
+
+--
+SELECT c.name, json_build_object('id', c.characteristic_id, 'value', avg(cr.value))
+FROM characteristics c
+INNER JOIN characteristic_reviews cr
+ON cr.characteristic_id = c.characteristic_id
+WHERE c.product_id = 1
+GROUP BY c.characteristic_id;
+
 
 
 

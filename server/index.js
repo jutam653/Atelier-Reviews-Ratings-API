@@ -25,8 +25,8 @@ app.get('/reviews', (req, res) => {
 })
 
 app.get('/reviews/meta', (req, res) => {
-  psql.getMeta()
-    .then((results) => res.status(200).send(results.rows));
+  psql.getMeta(req.query.product_id)
+    .then((results) => res.status(200).send(results.rows[0]));
 })
 
 app.listen(PORT, () => {
