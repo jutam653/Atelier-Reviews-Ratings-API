@@ -14,7 +14,6 @@ app.get('/reviews', (req, res) => {
   let order = req.query.sort || 'helpful';
   psql.getReviews(req.query.product_id, page, count, order)
     .then((results) => {
-      console.log(results.rows)
       reviews.product = req.query.product_id
       reviews.page = Number(page)
       reviews.count = count

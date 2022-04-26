@@ -4,7 +4,7 @@
   "description": "reviews api service for sdc",
   "main": "/server/index.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --detectOpenHandles",
     "server": "nodemon server/index.js"
   },
   "repository": {
