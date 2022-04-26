@@ -32,10 +32,6 @@ app.get('/reviews/meta', (req, res) => {
 
 app.post('/reviews', (req, res) => {
   let date = new Date().getTime();
-  console.log('date: ', date)
-  console.log('body: ', req.body)
-  console.log('photos: ', req.body.photos)
-  console.log('char: ', req.body.characteristics)
   psql.addReview(req.body, date)
     .then((results) => res.status(201).send('CREATED'))
     .catch((err) => res.status(404).send(err));
@@ -56,3 +52,5 @@ app.put('/reviews/:review_id/report', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`)
 });
+
+module.exports = app;
