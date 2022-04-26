@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/jutam653/SDC-reviews-test#readme",
   "dependencies": {
+    "dotenv": "^16.0.0",
     "express": "^4.17.3",
     "node": "^17.7.2",
     "npm": "^8.7.0",

@@ -17,6 +17,12 @@ export const options = {
 };
 
 export default () => {
-  //http.get(`http://localhost:3001/reviews?product_id=${Math.floor(Math.random(999999))}`)
-  http.get(`http://localhost:3001/reviews/meta?product_id=${Math.floor(Math.random(999999))}`);
+  let id = Math.floor(Math.random(999999))
+
+  const responses = http.batch([
+    ['GET', `http://localhost:3001/reviews?product_id=${id}`],
+    ['GET', `http://localhost:3001/reviews/meta?product_id=${id}`]
+  ]);
+
 };
+
