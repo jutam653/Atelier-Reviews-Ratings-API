@@ -4,7 +4,6 @@ const request = supertest(app);
 
 describe('Reviews', () => {
 
-
   it('gets reviews by product ID', async () => {
     const id = 65660;
     const response = await request.get(`/reviews?product_id=${id}`);
@@ -17,7 +16,7 @@ describe('Reviews', () => {
     );
   });
 
-  it('gets product\'s meta in the same shape', async () => {
+  it('gets product\'s meta in the right shape', async () => {
     const id = 65660;
     const response = await request.get(`/reviews/meta?product_id=${id}`);
     expect(response.status).toBe(200);
