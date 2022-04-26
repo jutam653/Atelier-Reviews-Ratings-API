@@ -80,6 +80,11 @@ INSERT INTO products (product_id)
 SELECT DISTINCT product_id
 FROM raw_products;
 
+-- sync sequence with table
+SELECT setval('reviews_review_id_seq', (SELECT max(review_id) FROM reviews));
+SELECT setval('photos_photo_id_seq', (SELECT max(photo_id) FROM photos));
+SELECT setval('characteristic_reviews_id_seq', (SELECT max(id) FROM characteristic_reviews));
+
 -- product
 SELECT product_id
 FROM products
@@ -163,6 +168,31 @@ SELECT cr.product_id::TEXT, json_object_agg(ra.rating, ra.count::TEXT) ratings, 
       ORDER BY c.characteristic_id ASC
   ) AS cr
 GROUP BY cr.product_id;
+
+-- post
+WITH ins1 AS (
+  INSERT INTO reviews(product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness)
+  VALUES (1, 5, 1650867538924, 'test', 'tester', true, false, 'test', 'test@gmail.com', 'null', 0)
+  RETURNING review_id
+  ), ins2 AS (
+  INSERT INTO photos(review_id, url)
+  SELECT t1.review_id, t2.urls
+  FROM (
+    VALUES ((SELECT review_id FROM ins1), array['testurl', 'testurl2'])
+  ) AS t1(review_id, url)
+    CROSS JOIN unnest(t1.url) AS t2(urls)
+  )
+INSERT INTO characteristic_reviews(characteristic_id, review_id, value)
+SELECT t4.key::INT, t3.review_id, t4.value::INT
+  FROM (
+    SELECT review_id FROM ins1
+  ) AS t3,
+  (
+    SELECT * from json_each_text('{"1": 5,"2": 5,"3": 5,"4": 5}')
+  ) AS t4;
+
+
+
 
 
 

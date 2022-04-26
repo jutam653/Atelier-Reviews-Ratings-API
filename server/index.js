@@ -32,12 +32,26 @@ app.get('/reviews/meta', (req, res) => {
 
 app.post('/reviews', (req, res) => {
   let date = new Date().getTime();
-  console.log(date)
-  console.log(req.body, req.body.photos, req.body.characteristics)
-  // psql.addReview(req.body, date)
-  //   .then((results) => res.status(201).send('POSTED'))
-  //   .catch((err) => res.status(404).send(err));
-})
+  console.log('date: ', date)
+  console.log('body: ', req.body)
+  console.log('photos: ', req.body.photos)
+  console.log('char: ', req.body.characteristics)
+  psql.addReview(req.body, date)
+    .then((results) => res.status(201).send('CREATED'))
+    .catch((err) => res.status(404).send(err));
+});
+
+app.put('/reviews/:review_id/helpful', (req, res) => {
+  psql.markHelpful(req.params.review_id)
+    .then((results) => res.status(204).send('UPDATED'))
+    .catch((err) => res.status(404).send(err));
+});
+
+app.put('/reviews/:review_id/report', (req, res) => {
+  psql.reportReview(req.params.review_id)
+    .then((results) => res.status(204).send('REPORTED'))
+    .catch((err) => res.status(404).send(err));
+});
 
 app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`)

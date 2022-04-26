@@ -20,7 +20,7 @@ const getReviews = (id, page, count, order) => {
     FROM photos p
     RIGHT OUTER JOIN reviews r
     ON r.review_id = p.review_id
-    WHERE r.product_id = ${id}
+    WHERE r.product_id = ${id} AND r.reported = false
     GROUP BY r.review_id
     ${sort}
     LIMIT ${count} OFFSET ${offset}
@@ -64,22 +64,55 @@ const getMeta = (id) => {
 };
 
 const addReview = (body, date) => {
+  let characteristics = JSON.stringify(body.characteristics);
+  let photos = body.photos.map((photo) => `'${photo}'` );
 
   const query = `
-  WITH ins1 AS (
-    INSERT INTO reviews(product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness)
-    VALUES (${body.product_id}, ${body.rating}, ${date}, ${body.summary}, ${body.body}, ${body.recommend}, false, ${body.name}, ${body.email})
-    RETURNING review_id
-    )
-  , INSERT INTO photos(review_id, url)
-    VALUES(review_id, UNNEST(${body.photos}))
+    WITH ins1 AS (
+      INSERT INTO reviews(product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness)
+      VALUES (${body.product_id}, ${body.rating}, ${date}, '${body.summary}', '${body.body}', ${body.recommend}, false, '${body.name}', '${body.email}', 'null', 0)
+      RETURNING review_id
+      ), ins2 AS (
+        INSERT INTO photos(review_id, url)
+        SELECT t1.review_id, t2.urls
+        FROM (
+          VALUES ((SELECT review_id FROM ins1), array[${photos}]::text[])
+        ) AS t1(review_id, url)
+          CROSS JOIN unnest(t1.url) AS t2(urls)
+      )
+    INSERT INTO characteristic_reviews(characteristic_id, review_id, value)
+    SELECT t4.key::INT, t3.review_id, t4.value::INT
+      FROM (
+        SELECT review_id FROM ins1
+      ) AS t3,
+      (
+        SELECT * FROM json_each_text('${characteristics}')
+      ) AS t4;
   `;
 
   return db.query(query);
 }
 
+const markHelpful = (id) => {
+  const query = `
+    UPDATE reviews SET helpfulness = helpfulness + 1 WHERE review_id = ${id}
+  `;
+
+  return db.query(query);
+};
+
+const reportReview = (id) => {
+  const query = `
+    UPDATE reviews SET reported = true WHERE review_id = ${id}
+  `;
+
+  return db.query(query);
+};
+
 module.exports = {
   getReviews,
   getMeta,
   addReview,
+  markHelpful,
+  reportReview,
 };
