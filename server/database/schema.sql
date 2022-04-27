@@ -142,11 +142,11 @@ FROM (
 	) AS ra;
 
 -- combined
-SELECT cr.product_id::TEXT, json_object_agg(ra.rating, ra.count::TEXT) ratings, json_object_agg(rec.recommend, rec.count::TEXT) recommended, json_object_agg(cr.name, cr.obj) characteristics
+SELECT cr.product_id::TEXT, json_object_agg(ra.rating, ra.count::TEXT) AS ratings, json_object_agg(rec.recommend, rec.count::TEXT) AS recommended, json_object_agg(cr.name, cr.obj) AS characteristics
   FROM (
     SELECT
       recommend, count(*)
-      FROM reviews r
+      FROM reviews
       WHERE product_id = 900000
       GROUP BY recommend
   ) AS rec,
